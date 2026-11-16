@@ -1,0 +1,74 @@
+[package]
+name = "pa-mts"
+version = "0.0.1"
+edition = "2021"
+autobenches = false
+license = "Apache-2.0"
+description = "PA-MTS private and accountable multiverse threshold signature implementation"
+categories = ["cryptography"]
+keywords = ["pa-mts", "signature", "cryptography", "accountability"]
+
+[profile.bench]
+opt-level = 3
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+serde_support = []
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(feature, values("b12_381", "parallel"))'] }
+
+[dependencies]
+# The upstream MTS artifact used a git fork (civicrypt/bls12_381) that adds Pippenger
+# multi-exponentiation. That fork is not reachable from this build environment, so we use
+# bls12_381_plus, which provides the same `sum_of_products` (Pippenger) API and RFC 9380
+# hash-to-curve. It is renamed to `bls12_381` so the source keeps its imports.
+bls12_381 = { package = "bls12_381_plus", version = "=0.8.18" }
+elliptic-curve = { version = "0.13", default-features = false, features = ["hash2curve"] }
+ff = "0.13"
+group = "0.13"
+pairing = "0.23"
+thiserror = "1.0.26"
+rand = { version = "0.8.4" }
+serde = { version = "1.0.136", features = ["derive"] }
+itertools = "0.10.3"
+sha2 = "0.10"
+rand_seeder = "0.2.3"
+aes-gcm = { version = "0.10.3", default-features = false, features = ["aes", "alloc"] }
+
+[dev-dependencies]
+rand = { version = "0.8.4", features = ["small_rng"] }
+lazy_static = "1.4.0"
+criterion = { version = "0.3.4", features = ["html_reports"] }
+bincode = "1.3.3"
+
+[target.'cfg(unix)'.dev-dependencies]
+pprof = { version = "0.6", features = ["flamegraph"] }
+
+[[bench]]
+name = "bench_smoke"
+harness = false
+
+[[bench]]
+name = "bench_multiverse_sig"
+harness = false
+
+[[bench]]
+name = "bench_pa_multiverse_sig"
+harness = false
+
+[[bench]]
+name = "bench_mts_ugen"
+harness = false
+
+[[bench]]
+name = "bench_pa_mts_ugen"
+harness = false
+
+[[bench]]
+name = "bench_size_report"
+harness = false
+
+[profile.test]
+opt-level = 3
